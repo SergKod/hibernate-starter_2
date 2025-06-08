@@ -1,0 +1,218 @@
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n  <modelVersion>4.0.0</modelVersion>\r\n\r\n  <groupId>org.example</groupId>\r\n  <artifactId>hibernate-starter</artifactId>\r\n  <version>1.0-SNAPSHOT</version>\r\n  <packaging>jar</packaging>\r\n\r\n  <name>hibernate-starter</name>\r\n  <url>http://maven.apache.org</url>\r\n\r\n  <properties>\r\n    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\r\n  </properties>\r\n\r\n  <dependencies>\r\n    <dependency>\r\n      <groupId>org.hibernate.orm</groupId>\r\n      <artifactId>hibernate-core</artifactId>\r\n      <version>7.0.0.Final</version>\r\n    </dependency>\r\n    <dependency>\r\n      <groupId>org.postgresql</groupId>\r\n      <artifactId>postgresql</artifactId>\r\n      <version>42.2.21</version>\r\n    </dependency>\r\n    <dependency>\r\n      <groupId>org.projectlombok</groupId>\r\n      <artifactId>lombok</artifactId>\r\n      <version>1.18.38</version>\r\n      <scope>provided</scope>\r\n    </dependency>\r\n    <dependency>\r\n      <groupId>org.slf4j</groupId>\r\n      <artifactId>slf4j-simple</artifactId>\r\n      <version>2.0.17</version>\r\n      <scope>test</scope>\r\n    </dependency>\r\n    <dependency>\r\n      <groupId>org.postgresql</groupId>\r\n      <artifactId>postgresql</artifactId>\r\n      <version>42.6.0</version>\r\n    </dependency>\r\n\r\n    <!-- JUnit 5 -->\r\n    <dependency>\r\n      <groupId>org.junit.jupiter</groupId>\r\n      <artifactId>junit-jupiter-engine</artifactId>\r\n      <version>5.9.2</version>\r\n      <scope>test</scope>\r\n    </dependency>\r\n\r\n    <!-- Mockito -->\r\n    <dependency>\r\n      <groupId>org.mockito</groupId>\r\n      <artifactId>mockito-core</artifactId>\r\n      <version>5.4.0</version>\r\n      <scope>test</scope>\r\n    </dependency>\r\n\r\n  </dependencies>\r\n  <build>\r\n    <plugins>\r\n      <plugin>\r\n        <groupId>org.apache.maven.plugins</groupId>\r\n        <artifactId>maven-compiler-plugin</artifactId>\r\n        <configuration>\r\n          <annotationProcessorPaths>\r\n            <path>\r\n              <groupId>org.projectlombok</groupId>\r\n              <artifactId>lombok</artifactId>\r\n              <version>1.18.38</version>\r\n            </path>\r\n          </annotationProcessorPaths>\r\n          <source>14</source>\r\n          <target>14</target>\r\n        </configuration>\r\n      </plugin>\r\n    </plugins>\r\n  </build>\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/pom.xml b/pom.xml
+--- a/pom.xml	(revision 8b3c7c00f9734c5ad19f354f48d427ca77489fbf)
++++ b/pom.xml	(date 1749417556487)
+@@ -15,28 +15,33 @@
+   </properties>
+ 
+   <dependencies>
++
+     <dependency>
+       <groupId>org.hibernate.orm</groupId>
+       <artifactId>hibernate-core</artifactId>
+       <version>7.0.0.Final</version>
+     </dependency>
++
+     <dependency>
+       <groupId>org.postgresql</groupId>
+       <artifactId>postgresql</artifactId>
+       <version>42.2.21</version>
+     </dependency>
++
+     <dependency>
+       <groupId>org.projectlombok</groupId>
+       <artifactId>lombok</artifactId>
+       <version>1.18.38</version>
+       <scope>provided</scope>
+     </dependency>
++
+     <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-simple</artifactId>
+       <version>2.0.17</version>
+       <scope>test</scope>
+     </dependency>
++
+     <dependency>
+       <groupId>org.postgresql</groupId>
+       <artifactId>postgresql</artifactId>
+@@ -59,6 +64,14 @@
+       <scope>test</scope>
+     </dependency>
+ 
++    <!-- Testcontainers -->
++    <dependency>
++      <groupId>org.testcontainers</groupId>
++      <artifactId>postgresql</artifactId>
++      <version>1.19.1</version>
++      <scope>test</scope>
++    </dependency>
++
+   </dependencies>
+   <build>
+     <plugins>
+Index: src/test/java/org/example/UserDaoIntegrationTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/org/example/UserDaoIntegrationTest.java b/src/test/java/org/example/UserDaoIntegrationTest.java
+new file mode 100644
+--- /dev/null	(date 1749419058349)
++++ b/src/test/java/org/example/UserDaoIntegrationTest.java	(date 1749419058349)
+@@ -0,0 +1,104 @@
++package org.example;
++import net.bytebuddy.utility.dispatcher.JavaDispatcher;
++import org.example.dao.UserDao;
++import org.example.model.User;
++import org.junit.jupiter.api.AfterAll;
++import org.junit.jupiter.api.BeforeAll;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.TestInstance;
++import org.testcontainers.containers.PostgreSQLContainer;
++import java.util.List;
++import java.util.Optional;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++
++@TestInstance(TestInstance.Lifecycle.PER_CLASS)
++public class UserDaoIntegrationTest {
++
++
++    private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:15")
++            .withDatabaseName("test_db")
++            .withUsername("user")
++            .withPassword("pass");
++
++    private UserDao userDao;
++
++    @BeforeAll
++    void setUp() {
++        postgresContainer.start();
++
++        TestHibernateUtil.configure(
++                postgresContainer.getJdbcUrl(),
++                postgresContainer.getUsername(),
++                postgresContainer.getPassword()
++        );
++
++        userDao = new UserDao();
++    }
++
++    @AfterAll
++    void tearDown() {
++        TestHibernateUtil.shutdown();
++        postgresContainer.stop();
++    }
++
++    @Test
++    void testSaveAndFindById() {
++        User user = new User();
++        user.setName("Alice");
++        user.setEmail("alice@example.com");
++
++        userDao.save(user);
++
++        Optional<User> found = userDao.findById(user.getId());
++        assertTrue(found.isPresent());
++        assertEquals("Alice", found.get().getName());
++    }
++
++    @Test
++    void testFindAll() {
++        User user1 = new User();
++        user1.setName("John");
++        user1.setEmail("john@example.com");
++
++        User user2 = new User();
++        user2.setName("Jane");
++        user2.setEmail("jane@example.com");
++
++        userDao.save(user1);
++        userDao.save(user2);
++
++        List<User> all = userDao.findAll();
++        assertTrue(all.size() >= 2); // Можно проверять конкретно, если база чистая
++    }
++
++    @Test
++    void testUpdate() {
++        User user = new User();
++        user.setName("Bob");
++        user.setEmail("bob@example.com");
++        userDao.save(user);
++
++        user.setName("Robert");
++        userDao.update(user);
++
++        Optional<User> updated = userDao.findById(user.getId());
++        assertTrue(updated.isPresent());
++        assertEquals("Robert", updated.get().getName());
++    }
++
++    @Test
++    void testDelete() {
++        User user = new User();
++        user.setName("ToDelete");
++        user.setEmail("delete@example.com");
++        userDao.save(user);
++
++        userDao.delete(user.getId());
++
++        Optional<User> deleted = userDao.findById(user.getId());
++        assertTrue(deleted.isEmpty());
++    }
++}
+Index: src/test/java/org/example/TestHibernateUtil.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/org/example/TestHibernateUtil.java b/src/test/java/org/example/TestHibernateUtil.java
+new file mode 100644
+--- /dev/null	(date 1749418034420)
++++ b/src/test/java/org/example/TestHibernateUtil.java	(date 1749418034420)
+@@ -0,0 +1,35 @@
++package org.example;
++
++import org.example.model.User;
++import org.hibernate.SessionFactory;
++import org.hibernate.cfg.Configuration;
++
++public class TestHibernateUtil {
++
++    private static SessionFactory sessionFactory;
++
++    public static void configure(String jdbcUrl, String username, String password) {
++        Configuration configuration = new Configuration();
++        configuration.setProperty("hibernate.connection.url", jdbcUrl);
++        configuration.setProperty("hibernate.connection.username", username);
++        configuration.setProperty("hibernate.connection.password", password);
++        configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
++        configuration.setProperty("hibernate.hbm2ddl.auto", "create-drop");
++        configuration.setProperty("hibernate.show_sql", "true");
++
++        // Добавить аннотированный класс
++        configuration.addAnnotatedClass(User.class);
++
++        sessionFactory = configuration.buildSessionFactory();
++    }
++
++    public static SessionFactory getSessionFactory() {
++        return sessionFactory;
++    }
++
++    public static void shutdown() {
++        if (sessionFactory != null) {
++            sessionFactory.close();
++        }
++    }
++}
